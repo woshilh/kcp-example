@@ -1,0 +1,5 @@
+include_directories(${CMAKE_SOURCE_DIR}/entity)
+include_directories(${CMAKE_SOURCE_DIR}/kcp)
+set(EXECUTABLE_NAME "t_test")
+add_executable(${EXECUTABLE_NAME} ${CMAKE_SOURCE_DIR}/test/t_encoder.cc)
+target_link_libraries(${EXECUTABLE_NAME} entity)
