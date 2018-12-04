@@ -11,3 +11,6 @@ cd build
 cmake ..  
 make  
 
+./t_server  
+./t_client  
+
