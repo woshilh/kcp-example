@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <memory.h>
+#include "taskqueue.h"
+#include <unistd.h>
 static char serv_ip[]="10.0.4.2";
 
 uint16_t serv_port=4321;
@@ -29,7 +31,11 @@ int main(){
 	signal(SIGTSTP, signal_exit_handler);
     su_udp_create(serv_ip,serv_port,&fd);
 
-    KcpStream stream;
+    rtc::Ns3TaskQueue worker;
+    worker.Start();
+    KcpStream stream(&worker);
+    std::string name("kcp");
+    stream.EnableRecord(name);
 	ikcpcb *kcp=ikcp_create(0x11223344, (void*)(&stream));
 
 	kcp->output=udp_output;
@@ -91,4 +97,6 @@ int main(){
     }
     ikcp_release(kcp);
     su_socket_destroy(fd);
+    sleep(1);
+    worker.Stop();
 }

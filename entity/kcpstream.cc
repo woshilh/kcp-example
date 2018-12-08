@@ -2,10 +2,28 @@
 #include "kcp_utils.h"
 #include "proto.h"
 #include <string.h>
+#include <unistd.h>
+#include <memory.h>
+typedef struct{
+uint32_t ts;
+uint32_t len;
+}record_t;
 static uint32_t max_buf_size=1000;
 static char terminate_signal[]="stop";
-KcpStream::KcpStream(){
+KcpStream::KcpStream(rtc::Ns3TaskQueue* w){
+	w_=w;
 	memset(first_buf,0,max_buf_size);
+}
+KcpStream::~KcpStream(){
+	CloseRecord();
+}
+void KcpStream::EnableRecord(std::string name){
+	char buf[FILENAME_MAX];
+	memset(buf,0,FILENAME_MAX);
+	std::string path = std::string (getcwd(buf, FILENAME_MAX))
+			+"_"+name+"_recv.txt";
+	log_enable_=true;
+	f_record_.open(path.c_str(), std::fstream::out);
 }
 bool KcpStream::IsSessionStop(){
 	uint32_t now=iclock();
@@ -88,6 +106,7 @@ void KcpStream::MessageFromRemoteEnd(void *buf,uint32_t buf_len){
 	if(error_||buf_len==0){
 		return ;
 	}
+	RecordData(buf_len);
 	recved_+=buf_len;
 	if(!header_read_done_){
 		uint32_t min_length=buf_len>max_buf_size?max_buf_size:buf_len;
@@ -103,7 +122,32 @@ void KcpStream::MessageFromRemoteEnd(void *buf,uint32_t buf_len){
 		}
 	}
 }
-
-
-
-
+void KcpStream::RecordData(uint32_t len){
+	if(log_enable_&&w_){
+		uint32_t now=iclock();
+		if(first_recv_ts_==0){
+			first_recv_ts_=now;
+		}
+		uint32_t abs=now-first_recv_ts_;
+		record_t record;
+		record.ts=abs;
+		record.len=len;
+		w_->PostTask([this,record]{
+			this->LogToFile(&record);
+		});
+	}
+}
+void KcpStream::CloseRecord(){
+	if(f_record_.is_open()){
+		f_record_.close();
+	}
+}
+void KcpStream::LogToFile(const void *data){
+	record_t *record=(record_t*)data;
+	if(f_record_.is_open()){
+		char line [256];
+		memset(line,0,256);
+		sprintf (line, "%d %16d",record->ts,record->len);
+		f_record_<<line<<std::endl;
+	}
+}

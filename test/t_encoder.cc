@@ -13,7 +13,7 @@ int main(){
     uint8_t buf[buf_len];
     int read_ret=0;
     int read_c=0;
-    KcpStream stream;
+    KcpStream stream(NULL);
     do{
         memset(buf,0,buf_len);
         read_ret=reader.RequestData(buf,buf_len);
