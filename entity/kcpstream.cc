@@ -96,7 +96,7 @@ void KcpStream::MessageFromRemoteEnd(void *buf,uint32_t buf_len){
 		header_read_done_=true;
 	}
 	if(header_parsed_){
-        printf("%d\n",recved_);
+        printf("recv %d\n",recved_);
 		if(recved_==total_){
             recv_done_=true;
 			done_ts_= iclock();

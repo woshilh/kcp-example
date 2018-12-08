@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <signal.h>
 #include "fakefilereader.h"
-static char ip[]="127.0.0.1";
+static char ip[]="10.0.0.1";
 uint16_t client_port=1234;
 
-static char addr[]="127.0.0.1:4321";
+static char addr[]="10.0.4.2:4321";
 static int run_status=1;
 void signal_exit_handler(int sig)
 {
@@ -36,7 +36,7 @@ int main(){
     signal(SIGTERM, signal_exit_handler);
 	signal(SIGINT, signal_exit_handler);
 	signal(SIGTSTP, signal_exit_handler);
-	uint32_t msg_len=1024*1024*8;//1MB //10*1024*1024;
+	uint32_t msg_len=1024*1024;//1MB //10*1024*1024;
 	FakeFileReader reader;
 	reader.SetDataSize(msg_len);
 	ikcpcb *kcp=ikcp_create(0x11223344, (void*)(&reader));

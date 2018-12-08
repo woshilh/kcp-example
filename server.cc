@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <memory.h>
-static char serv_ip[]="127.0.0.1";
+static char serv_ip[]="10.0.4.2";
 
 uint16_t serv_port=4321;
 
